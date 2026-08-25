@@ -92,6 +92,6 @@ async def indexed_lookup(request: Request, external_id: str) -> dict:
     )
 
 
-@app.get("/health", include_in_schema=False)
+@app.get("/healthz", include_in_schema=False)
 async def health() -> dict[str, str]:
     return {"status": "ok"}

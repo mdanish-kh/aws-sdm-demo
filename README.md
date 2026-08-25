@@ -24,6 +24,35 @@ uvicorn app.main:app --reload
 
 The default local database URL is `postgresql://demo:demo@localhost:5432/load_demo`. Override it with the `DATABASE_URL` environment variable.
 
+## Deploy to Elastic Beanstalk
+
+Create an Elastic Beanstalk environment using the current Python platform. The included `Procfile` starts two Uvicorn workers on `0.0.0.0:8000`, and `.ebextensions/01-healthcheck.config` configures `/healthz` as the environment health check.
+
+Create the upload ZIP from the contents of the repository, not from its parent directory. On PowerShell:
+
+```powershell
+tar -a -c -f aws-sdm-demo-eb.zip `
+  app/__init__.py app/main.py db/init.sql `
+  .ebextensions/01-healthcheck.config `
+  Procfile requirements.txt README.md
+```
+
+Upload `aws-sdm-demo-eb.zip` as an application version in Elastic Beanstalk and deploy it. The ZIP root must contain `Procfile`, `requirements.txt`, `.ebextensions`, and `app`; it must not contain an enclosing `aws-sdm-demo` directory.
+
+The `/hello`, `/large-payload`, and `/healthz` endpoints work without a database. For the database endpoints:
+
+1. Create or use a PostgreSQL database reachable from the environment instances.
+2. Run `db/init.sql` against that database once.
+3. Add a `DATABASE_URL` environment property under **Elastic Beanstalk > Configuration > Updates, monitoring, and logging > Environment properties**.
+
+Use this format:
+
+```text
+postgresql://USER:PASSWORD@DATABASE_HOST:5432/DATABASE_NAME
+```
+
+Do not use `localhost` for RDS. Ensure the database security group accepts PostgreSQL traffic from the Elastic Beanstalk instance security group.
+
 ## Endpoints
 
 ### `GET /hello`
