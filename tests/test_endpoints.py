@@ -39,7 +39,7 @@ def test_root():
 
 def test_hello():
     with TestClient(main.app) as client:
-        response = client.get("/hello")
+        response = client.get("/endpoint1")
 
     assert response.status_code == 200
     assert response.json() == {"message": "Hello, World!"}
@@ -47,7 +47,7 @@ def test_hello():
 
 def test_large_payload_is_exactly_two_mib():
     with TestClient(main.app) as client:
-        response = client.get("/large-payload")
+        response = client.get("/endpoint2")
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/json"
@@ -57,7 +57,7 @@ def test_large_payload_is_exactly_two_mib():
 def test_table_scan(monkeypatch):
     monkeypatch.setattr(main, "get_pool", fake_get_pool)
     with TestClient(main.app) as client:
-        response = client.get(f"/db/scan/{EXTERNAL_ID}")
+        response = client.get(f"/endpoint3/{EXTERNAL_ID}")
 
     assert response.status_code == 200
     assert response.json()["id"] == 1
@@ -66,7 +66,19 @@ def test_table_scan(monkeypatch):
 def test_indexed_lookup(monkeypatch):
     monkeypatch.setattr(main, "get_pool", fake_get_pool)
     with TestClient(main.app) as client:
-        response = client.get(f"/db/indexed/{EXTERNAL_ID}")
+        response = client.get(f"/endpoint4/{EXTERNAL_ID}")
 
     assert response.status_code == 200
     assert response.json()["id"] == 1
+
+
+def test_old_routes_are_not_available():
+    with TestClient(main.app) as client:
+        responses = [
+            client.get("/hello"),
+            client.get("/large-payload"),
+            client.get(f"/db/scan/{EXTERNAL_ID}"),
+            client.get(f"/db/indexed/{EXTERNAL_ID}"),
+        ]
+
+    assert all(response.status_code == 404 for response in responses)

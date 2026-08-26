@@ -68,17 +68,17 @@ async def root() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/hello", summary="Small response for CPU/request-rate testing")
+@app.get("/endpoint1", summary="Endpoint 1")
 async def hello() -> dict[str, str]:
     return {"message": "Hello, World!"}
 
 
-@app.get("/large-payload", summary="Return an exact 2 MiB JSON response")
+@app.get("/endpoint2", summary="Endpoint 2")
 async def large_payload() -> Response:
     return Response(content=LARGE_JSON, media_type="application/json")
 
 
-@app.get("/db/scan/{external_id}", summary="Intentionally slow table scan")
+@app.get("/endpoint3/{external_id}", summary="Endpoint 3")
 async def table_scan(request: Request, external_id: str) -> dict:
     # UPPER(column) prevents the normal external_id index from being used.
     return await run_lookup(
@@ -88,7 +88,7 @@ async def table_scan(request: Request, external_id: str) -> dict:
     )
 
 
-@app.get("/db/indexed/{external_id}", summary="Fast indexed lookup")
+@app.get("/endpoint4/{external_id}", summary="Endpoint 4")
 async def indexed_lookup(request: Request, external_id: str) -> dict:
     return await run_lookup(
         request,
