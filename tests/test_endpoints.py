@@ -29,6 +29,14 @@ async def fake_get_pool(request):
     return FakePool()
 
 
+def test_root():
+    with TestClient(main.app) as client:
+        response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_hello():
     with TestClient(main.app) as client:
         response = client.get("/hello")

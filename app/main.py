@@ -63,6 +63,11 @@ async def run_lookup(request: Request, query: str, external_id: str) -> dict:
     }
 
 
+@app.get("/", include_in_schema=False)
+async def root() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @app.get("/hello", summary="Small response for CPU/request-rate testing")
 async def hello() -> dict[str, str]:
     return {"message": "Hello, World!"}

@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    # Set up environment variables on the runner so that EB CLI can use them for authentication
+    # A better way is to use GitHub OIDC with an IAM role
+    # but I'm going to use secrets for now for ease of demonstration.
+    # See https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: ${{ secrets.EB_PYTHON_VERSION }}
+          python-version: ${{ vars.EB_PYTHON_VERSION }}
 
       - name: Install EB CLI
         run: |
@@ -38,9 +40,9 @@ jobs:
 
       - name: Init EB directory
         run: |
-          eb init ${{ secrets.EB_APPLICATION_NAME }} -p python-${{ secrets.EB_PYTHON_VERSION }} -r ${{ secrets.AWS_DEFAULT_REGION }}
+          eb init ${{ vars.EB_APPLICATION_NAME }} -p python-${{ vars.EB_PYTHON_VERSION }} -r ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Deploy to Elastic Beanstalk environment
         run: >-
-          eb deploy "${{ secrets.EB_ENVIRONMENT_NAME }}"
+          eb deploy "${{ vars.EB_ENVIRONMENT_NAME }}"
           --message "Deploy ${{ github.sha }}"
